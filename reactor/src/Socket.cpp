@@ -2,10 +2,16 @@
 #include <sys/socket.h>
 #include <sys/unistd.h>
 #include <cstdio>
+#include <cstdlib>
 
 Socket::Socket()
 {
     this->m_fd = socket(PF_INET, SOCK_STREAM, 0);
+    if (this->m_fd == -1)
+    {
+        ::perror("socket create error");
+        ::exit(1);
+    }
 }
 
 Socket::Socket(int _fd) : m_fd(_fd)
