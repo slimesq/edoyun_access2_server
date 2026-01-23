@@ -1,10 +1,11 @@
 #pragma once
-class Noncopyable{
+class Noncopyable
+{
 public:
- Noncopyable() = default;
+    Noncopyable() = default;
 
-    Noncopyable(const Noncopyable&) = delete;
-    Noncopyable& operator = (const Noncopyable&) = delete;
-    Noncopyable(const Noncopyable&&) = delete;
-    Noncopyable& operator = (const Noncopyable&&) = delete;
+    Noncopyable(Noncopyable const&) = delete;
+    Noncopyable& operator=(Noncopyable const&) = delete;
+    Noncopyable(Noncopyable const&&) = delete;
+    Noncopyable& operator=(Noncopyable const&&) = delete;
 };
