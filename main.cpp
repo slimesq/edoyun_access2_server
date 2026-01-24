@@ -2,26 +2,38 @@
 #include <iostream>
 #include "Acceptor.h"
 #include "TcpConnection.h"
+#include "EventLoop.h"
+
+// connection established
+void onNewConnection(std::shared_ptr<TcpConnection> const& _conn)
+{
+    _conn->send("Welcome to server!\n");
+}
+
+// connection readable
+void onMessage(std::shared_ptr<TcpConnection> const& _conn)
+{
+    std::string msg = _conn->recive();
+    _conn->send(msg);  // echo back
+}
+
+// connection closed
+void onClose(std::shared_ptr<TcpConnection> const& _conn)
+{
+    std::cout << "onClose: " << _conn->toString() << " has closed." << std::endl;
+}
 
 int main(int argc, char* argv[])
 {
-    Acceptor acceptor(argv[1], atoi(argv[2]));
+    Acceptor acceptor("127.0.0.1", 8888);
     acceptor.ready();
-    std::cout << "Server is running..." << std::endl;
-    while (1)
-    {
-        int connfd = acceptor.accept();
-        if (connfd < 0)
-        {
-            ::sleep(1);
-            continue;
-        }
-        else
-        {
-            TcpConnection tcpConn(connfd);
-            tcpConn.send("hello world\n");
-        }
-    }
+
+    EventLoop eventLoop(acceptor);
+    eventLoop.setOnConnectionCallback(onNewConnection);
+    eventLoop.setOnMessageCallback(onMessage);
+    eventLoop.setOnCloseCallback(onClose);
+
+    eventLoop.loop();
 
     return 0;
 }

@@ -3,10 +3,10 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
-#include <utils/Noncopyable.h>
 #include <string>
+#include "utils/NonCopyable.h"
 
-class InetAddress : public Noncopyable
+class InetAddress : public NonCopyable
 {
 public:
     InetAddress(std::string const& _ip, unsigned short _port);
@@ -15,21 +15,21 @@ public:
 
     /**
      * @brief Get IP address in string format.
-     * 
+     *
      * @return std::string Ip address.
      */
-    std::string getIp();
+    std::string getIp() const;
 
     /**
      * @brief Get port number.
-     * 
+     *
      * @return unsigned short Port number.
      */
-    unsigned short getPort();
+    unsigned short getPort() const;
 
     /**
      * @brief Get pointer to sockaddr_in structure.
-     * 
+     *
      * @return struct sockaddr_in* Sockaddr_in pointer.
      */
     struct sockaddr_in* getInetAddressPtr();
@@ -37,7 +37,7 @@ public:
 private:
     /**
      * @brief Socket address structure for IPv4.
-     * 
+     *
      */
     struct sockaddr_in m_addr;
 };

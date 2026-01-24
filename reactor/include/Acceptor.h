@@ -1,13 +1,20 @@
 #pragma once
 #include "InetAddress.h"
-#include "utils/Noncopyable.h"
+#include "utils/NonCopyable.h"
 #include "Socket.h"
 
-class Acceptor : public Noncopyable
+class Acceptor : public NonCopyable
 {
 public:
     Acceptor(std::string const& _ip, unsigned short _port);
     ~Acceptor();
+
+    /**
+     * @brief Get the listening socket fd.
+     *
+     * @return int Listening socket fd.
+     */
+    int getFd() const;
 
     /**
      * @brief Accept a new connection.
@@ -51,13 +58,13 @@ private:
 private:
     /**
      * @brief socket object for to bind listening address.
-     * 
+     *
      */
     Socket m_sock;
 
     /**
      * @brief address for to listen.
-     * 
+     *
      */
     InetAddress m_addr;
 };

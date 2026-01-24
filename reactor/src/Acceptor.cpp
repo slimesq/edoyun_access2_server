@@ -10,8 +10,20 @@ Acceptor::~Acceptor()
 {
 }
 
+int Acceptor::getFd() const
+{
+    return this->m_sock.getFd();
+}
+
 int Acceptor::accept()
 {
+    int connfd = ::accept(this->m_sock.getFd(), nullptr, nullptr);
+    if (connfd == -1)
+    {
+        perror("accept error");
+        ::exit(1);
+    }
+    return connfd;
 }
 
 void Acceptor::ready()
@@ -58,7 +70,7 @@ void Acceptor::bind()
 
 void Acceptor::listen()
 {
-    int ret{::listen(this->m_sock.getFd(), 10)};
+    int ret{::listen(this->m_sock.getFd(), 128)};
     if (ret == -1)
     {
         ::perror("listen error");

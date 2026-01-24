@@ -10,7 +10,6 @@ Socket::Socket()
     if (this->m_fd == -1)
     {
         ::perror("socket create error");
-        ::exit(1);
     }
 }
 

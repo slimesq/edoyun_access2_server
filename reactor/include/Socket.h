@@ -1,8 +1,8 @@
 #pragma once
 
-#include "utils/Noncopyable.h"
+#include "utils/NonCopyable.h"
 
-class Socket : public Noncopyable
+class Socket : public NonCopyable
 {
 public:
     Socket();

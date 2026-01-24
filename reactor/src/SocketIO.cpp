@@ -5,7 +5,6 @@
 #include <cstddef>
 #include <cstdio>
 #include <cstdlib>
-#include <filesystem>
 
 SocketIO::SocketIO(int _fd) : m_fd(_fd)
 {
@@ -84,16 +83,16 @@ ssize_t SocketIO::readline(void* _buf, size_t _maxCount)
     {
         // MSG_PEEK does not clear the data in the buffer, it only copies it.
         ret = ::recv(this->m_fd, pstr, left, MSG_PEEK);
-        if (-1 == ret && errno == EINTR)
+        if (ret == -1 && errno == EINTR)
         {
             continue;
         }
-        else if (-1 == ret)
+        else if (ret == -1)
         {
             ::perror("readLine error");
             ::exit(1);
         }
-        else if (0 == ret)
+        else if (ret == 0)
         {
             break;
         }

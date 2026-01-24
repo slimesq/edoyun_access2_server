@@ -1,11 +1,11 @@
 #pragma once
 #include <sys/types.h>
-#include "utils/Noncopyable.h"
+#include "utils/NonCopyable.h"
 
-class SocketIO : public Noncopyable
+class SocketIO : public NonCopyable
 {
 public:
-    SocketIO(int _fd);
+    explicit SocketIO(int _fd);
     ~SocketIO();
 
     /**

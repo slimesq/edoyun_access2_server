@@ -17,12 +17,12 @@ InetAddress::~InetAddress()
 {
 }
 
-std::string InetAddress::getIp()
+std::string InetAddress::getIp() const
 {
     return std::string(inet_ntoa(this->m_addr.sin_addr));
 }
 
-unsigned short InetAddress::getPort()
+unsigned short InetAddress::getPort() const
 {
     return ntohs(this->m_addr.sin_port);
 }
