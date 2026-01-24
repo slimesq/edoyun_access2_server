@@ -1,8 +1,7 @@
 #include <unistd.h>
 #include <iostream>
-#include "Acceptor.h"
 #include "TcpConnection.h"
-#include "EventLoop.h"
+#include "TcpServer.h"
 
 // connection established
 void onNewConnection(std::shared_ptr<TcpConnection> const& _conn)
@@ -25,15 +24,9 @@ void onClose(std::shared_ptr<TcpConnection> const& _conn)
 
 int main(int argc, char* argv[])
 {
-    Acceptor acceptor("127.0.0.1", 8888);
-    acceptor.ready();
-
-    EventLoop eventLoop(acceptor);
-    eventLoop.setOnConnectionCallback(onNewConnection);
-    eventLoop.setOnMessageCallback(onMessage);
-    eventLoop.setOnCloseCallback(onClose);
-
-    eventLoop.loop();
+    TcpServer server("127.0.0.1", 8888);
+    server.setAllCallbacks(std::move(onNewConnection), std::move(onMessage), std::move(onClose));
+    server.start();
 
     return 0;
 }

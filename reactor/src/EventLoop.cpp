@@ -1,6 +1,5 @@
 #include <sys/epoll.h>
 #include <unistd.h>
-#include <algorithm>
 #include <cerrno>
 #include <cstdio>
 #include <memory>
