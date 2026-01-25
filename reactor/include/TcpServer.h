@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include "EventLoop.h"
+#include "Acceptor.h"
 #include "utils/NonCopyable.h"
 
 class TcpServer : public NonCopyable

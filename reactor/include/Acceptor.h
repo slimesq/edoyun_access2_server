@@ -3,6 +3,8 @@
 #include "utils/NonCopyable.h"
 #include "Socket.h"
 
+class InetAddress;
+
 class Acceptor : public NonCopyable
 {
 public:

@@ -2,9 +2,10 @@
 #include <vector>
 #include <map>
 #include <memory>
-#include "Acceptor.h"
 #include "TcpConnection.h"
 #include <sys/epoll.h>
+
+class Acceptor;
 
 class EventLoop
 {

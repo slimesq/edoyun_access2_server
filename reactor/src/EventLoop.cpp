@@ -6,6 +6,7 @@
 #include <iostream>
 #include "EventLoop.h"
 #include "TcpConnection.h"
+#include "Acceptor.h"
 
 EventLoop::EventLoop(Acceptor& _acceptor)
     : m_epfd(createEpollFd()), m_evtList(1024), m_isLooping(false), m_acceptor(_acceptor)
