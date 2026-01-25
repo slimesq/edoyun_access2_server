@@ -33,7 +33,7 @@ void ThreadPool::stop()
     // If the task is not completed, the child thread must not be allowed to exit.
     while (!this->m_taskQueue.empty())
     {
-        ::sleep(1);  // main thread sleep 1 second and check again.
+        ::usleep(5000);  // main thread sleep 1 second and check again.
     }
 
     this->m_isExit = true;
@@ -48,15 +48,15 @@ void ThreadPool::stop()
     }
 }
 
-void ThreadPool::addTask(TaskPtr _pTask)
+void ThreadPool::addTask(TaskFunc _task)
 {
-    if (_pTask)
+    if (_task)
     {
-        this->m_taskQueue.push(_pTask);
+        this->m_taskQueue.push(_task);
     }
 }
 
-TaskPtr ThreadPool::getTask()
+TaskFunc ThreadPool::getTask()
 {
     return this->m_taskQueue.pop();
 }
@@ -68,11 +68,11 @@ void ThreadPool::doTask()
     while (!this->m_isExit)
     {
         // get a task from the task queue.
-        TaskPtr pTask = this->getTask();
-        if (pTask)
+        TaskFunc task = this->getTask();
+        if (task)
         {
             // execute the task.
-            pTask->process();  // This part will demonstrate polymorphism.
+            task();  // This part will demonstrate polymorphism.
         }
         else
         {

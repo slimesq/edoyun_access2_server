@@ -1,14 +1,18 @@
 #include "TcpConnection.h"
+#include "EventLoop.h"
 #include <netinet/in.h>
 #include <sys/socket.h>
 #include "InetAddress.h"
 #include <cstdio>
 #include <iostream>
-#include <memory>
 #include <sstream>
 
-TcpConnection::TcpConnection(int _fd)
-    : m_sockio(_fd), m_sock(_fd), m_localAddr(getLocalAddr()), m_peerAddr(getPeerAddr())
+TcpConnection::TcpConnection(EventLoop* _loop, int _fd)
+    : m_loop(_loop),
+      m_sockio(_fd),
+      m_sock(_fd),
+      m_localAddr(getLocalAddr()),
+      m_peerAddr(getPeerAddr())
 {
 }
 
@@ -134,4 +138,30 @@ InetAddress const TcpConnection::getPeerAddr() const
         ::perror("getpeername error");
     }
     return InetAddress(peerAddr);
+}
+
+/**
+ * @details In the function of "sendInLoop" here, the parameter "msg" is the data that has been
+ * processed by the thread pool. After that, it can be sent to the Reactor/EventLoop for further
+ * processing.
+ * However, for the Reactor/EventLoop, even if they obtain the processed data "msg",
+ * they cannot send the data to the client because for the Reactor/EventLoop, it does not have the
+ * ability to send data by itself.
+ *
+ * In the entire design, there are two classes that have the ability to send data. One
+ * is TcpConnection, and the other is SocketIO. However, SocketIO is more focused on
+ * the lower level, and the actual object that truly sends data externally is the TcpConnection
+ * object, or more specifically, the send function within TcpConnection. Therefore, the send
+ * function of TcpConnection, along with the data to be sent (msg), need to be packaged together as
+ * a "task" and handed over to the EventLoop/Reactor. In this way, the EventLoop/Reactor can send
+ * the data to the client.
+ *
+ */
+void TcpConnection::sendInLoop(std::string const& _sendMsg)
+{
+    std::function<void()> f = std::bind(&TcpConnection::send, this, _sendMsg);
+    if (this->m_loop)
+    {
+        this->m_loop->runInLoop(std::move(f));
+    }
 }

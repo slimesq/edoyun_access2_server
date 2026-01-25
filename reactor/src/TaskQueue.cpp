@@ -20,7 +20,7 @@ bool TaskQueue::full() const
     return this->m_queue.size() == this->m_queueSize;
 }
 
-void TaskQueue::push(TaskPtr pTask)
+void TaskQueue::push(TaskFunc _task)
 {
     // 1. add lock using RAII.
     std::unique_lock<std::mutex> lock(this->m_mutex);
@@ -31,12 +31,12 @@ void TaskQueue::push(TaskPtr pTask)
         // Wait until the queue is not full.
         this->m_notFull.wait(lock);
     }
-    this->m_queue.push(pTask);
+    this->m_queue.push(_task);
     this->m_notEmpty.notify_one();  // Notify one waiting thread that the queue is not empty.
     // 3. auto to unlock when out of scope.
 }
 
-TaskPtr TaskQueue::pop()
+TaskFunc TaskQueue::pop()
 {
     // 1. add lock using RAII.
     std::unique_lock<std::mutex> lock(this->m_mutex);
@@ -50,10 +50,10 @@ TaskPtr TaskQueue::pop()
 
     if (this->m_isRunning == true)
     {
-        TaskPtr pTask = this->m_queue.front();
+        TaskFunc task = this->m_queue.front();
         this->m_queue.pop();
         this->m_notFull.notify_one();  // Notify one waiting thread that the queue is not full.
-        return pTask;
+        return task;
     }
     else
     {
@@ -65,7 +65,6 @@ TaskPtr TaskQueue::pop()
 
 void TaskQueue::wakeAll()
 {
-    std::unique_lock<std::mutex> lock(this->m_mutex);
     this->m_isRunning = false;
     this->m_notEmpty.notify_all();
 }

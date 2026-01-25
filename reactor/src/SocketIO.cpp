@@ -62,7 +62,7 @@ ssize_t SocketIO::writen(void const* _buf, size_t _count)
             else
             {
                 ::perror("write error");
-                ::exit(-1);
+                return -1;
             }
         }
         pstr += nwritten;

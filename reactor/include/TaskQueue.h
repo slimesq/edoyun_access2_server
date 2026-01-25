@@ -1,12 +1,12 @@
 #pragma once
 
 #include <condition_variable>
-#include <memory>
+#include <functional>
 #include <queue>
 #include "utils/NonCopyable.h"
 #include "Task.h"
 
-using TaskPtr = Task*;
+using TaskFunc = std::function<void()>;
 
 class TaskQueue : public NonCopyable
 {
@@ -17,16 +17,16 @@ public:
     /**
      * @brief add a task into the queue.
      *
-     * @param pTask
+     * @param _task
      */
-    void push(TaskPtr pTask);
+    void push(TaskFunc _task);
 
     /**
      * @brief get a task from the queue.
      *
      * @return TaskPtr The task pointer.
      */
-    TaskPtr pop();
+    TaskFunc pop();
 
     /**
      * @brief check if the queue is empty.
@@ -62,7 +62,7 @@ private:
      * @brief storage for tasks.
      *
      */
-    std::queue<TaskPtr> m_queue;
+    std::queue<TaskFunc> m_queue;
 
     /**
      * @brief mutex for thread safety.

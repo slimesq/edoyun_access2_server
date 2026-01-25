@@ -32,14 +32,14 @@ public:
      *
      * @param _pTask The task pointer.
      */
-    void addTask(TaskPtr _pTask);
+    void addTask(TaskFunc _task);
 
     /**
      * @brief get a task from the task queue.
      *
      * @return TaskPtr the task pointer.
      */
-    TaskPtr getTask();
+    TaskFunc getTask();
 
 private:
     /**

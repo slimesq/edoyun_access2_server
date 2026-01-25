@@ -7,13 +7,14 @@
 #include "InetAddress.h"
 #include "utils/NonCopyable.h"
 
+class EventLoop;
 class TcpConnection;
 using TcpConnectionCallback = std::function<void(std::shared_ptr<TcpConnection> const&)>;
 
 class TcpConnection : public NonCopyable, public std::enable_shared_from_this<TcpConnection>
 {
 public:
-    explicit TcpConnection(int _fd);
+    explicit TcpConnection(EventLoop* _loop, int _fd);
     ~TcpConnection();
 
     /**
@@ -83,6 +84,13 @@ public:
      */
     void handleCloseCallback();
 
+    /**
+     * @brief send the processed results to the EventLoop.
+     *
+     * @param msg Processed results.
+     */
+    void sendInLoop(std::string const& _sendMsg);
+
 private:
     /**
      * @brief Get the local address of the listening socket.
@@ -99,6 +107,14 @@ private:
     InetAddress const getPeerAddr() const;
 
 private:
+    /**
+     * @brief Used to send the processed results to the EventLoop.
+     *
+     * @details The EventLoop is responsible for communicating with the client.
+     *
+     */
+    EventLoop* m_loop;
+
     SocketIO m_sockio;
 
     /* for Debug */

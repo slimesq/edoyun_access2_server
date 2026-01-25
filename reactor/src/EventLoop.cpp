@@ -1,17 +1,30 @@
 #include <sys/epoll.h>
+#include <sys/types.h>
 #include <unistd.h>
 #include <cerrno>
 #include <cstdio>
 #include <memory>
+#include <sys/eventfd.h>
 #include <iostream>
+#include <mutex>
 #include "EventLoop.h"
 #include "TcpConnection.h"
 #include "Acceptor.h"
 
 EventLoop::EventLoop(Acceptor& _acceptor)
-    : m_epfd(createEpollFd()), m_evtList(1024), m_isLooping(false), m_acceptor(_acceptor)
+    : m_epfd(createEpollFd()),
+      m_evtList(1024),
+      m_isLooping(false),
+      m_acceptor(_acceptor),
+      m_evtfd(createEventFd()),
+      m_pengdings(),
+      m_mutex()
 {
-    addEpollReadFd(m_acceptor.getFd());
+    // Place the listenfd on the red-black tree for monitoring.
+    addEpollReadFd(this->m_acceptor.getFd());
+
+    // Place the communication used between threads on a red-black tree for monitoring.
+    addEpollReadFd(this->m_evtfd);
 }
 
 EventLoop::~EventLoop()
@@ -71,6 +84,15 @@ void EventLoop::waitEpollFd()
             {
                 handleNewConnection();
             }
+            else if (curFd == this->m_evtfd)  // The file descriptor for communication is now ready.
+            {
+                this->handleEventFdRead();
+
+                /* do the assignment */
+
+                // Traverse m_pengdings
+                this->doPengdingFunctors();
+            }
             else
             {
                 handleMessage(curFd);
@@ -93,7 +115,7 @@ void EventLoop::handleNewConnection()
     addEpollReadFd(connfd);
 
     /*Create a TcpConnection for the new connection and store it in the connection map.*/
-    std::shared_ptr<TcpConnection> tcpConn{std::make_shared<TcpConnection>(connfd)};
+    std::shared_ptr<TcpConnection> tcpConn{std::make_shared<TcpConnection>(this, connfd)};
     // this->m_conns.insert(std::make_pair(connfd, tcpConn));
     this->m_conns[connfd] = tcpConn;
     std::cout << "new connection established: " << tcpConn->toString() << std::endl;
@@ -197,4 +219,60 @@ void EventLoop::setOnMessageCallback(TcpConnectionCallback&& _cb)
 void EventLoop::setOnCloseCallback(TcpConnectionCallback&& _cb)
 {
     this->m_onClose = std::move(_cb);
+}
+
+int EventLoop::createEventFd()
+{
+    int evtfd{::eventfd(0, 0)};
+    if (evtfd == -1)
+    {
+        ::perror("eventfd error");
+        return -1;
+    }
+    return evtfd;
+}
+
+void EventLoop::handleEventFdRead()
+{
+    uint64_t one{1};
+    ssize_t ret{::read(this->m_evtfd, &one, sizeof(uint64_t))};
+    if (ret == -1)
+    {
+        ::perror("handleEventFdRead error");
+        return;
+    }
+}
+
+void EventLoop::wakeupEventFd()
+{
+    uint64_t one{1};
+    ssize_t ret{::write(this->m_evtfd, &one, sizeof(uint64_t))};
+    if (ret == -1)
+    {
+        ::perror("handleEventFdRead error");
+        return;
+    }
+}
+
+void EventLoop::doPengdingFunctors()
+{
+    std::lock_guard<std::mutex> lock(this->m_mutex);
+    std::vector<Functors> tmp;
+    tmp.swap(this->m_pengdings);
+
+    for (auto& cb : tmp)
+    {
+        cb();
+    }
+}
+
+void EventLoop::runInLoop(Functors&& _cb)
+{
+    {  // The granularity of the control lock
+        std::lock_guard<std::mutex> lock(this->m_mutex);
+        this->m_pengdings.push_back(std::move(_cb));
+    }
+
+    this->wakeupEventFd();
+    // std::cout << "wakeupEventFd" << std::endl;
 }

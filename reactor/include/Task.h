@@ -1,9 +1,13 @@
 #pragma once
 
+#include <memory>
+#include "TcpConnection.h"
+
 class Task
 {
 public:
-    Task();
+    Task(std::shared_ptr<TcpConnection> const& _conn, std::string const& _msg);
+    Task(Task const& _task);
     virtual ~Task() = 0;
 
     /**
@@ -11,4 +15,19 @@ public:
      *
      */
     virtual void process() = 0;
+
+protected:
+    std::shared_ptr<TcpConnection> m_conn;
+
+    /**
+     * @brief recieved msg.
+     *
+     */
+    std::string m_recvMsg;
+
+    /**
+     * @brief The processed result string.
+     *
+     */
+    std::string m_sendMsg;
 };

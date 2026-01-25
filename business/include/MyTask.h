@@ -4,7 +4,7 @@
 class MyTask : public Task
 {
 public:
-    MyTask();
+    MyTask(std::shared_ptr<TcpConnection> const& _conn, const std::string& _recvMsg);
     ~MyTask() override;
 
     /**

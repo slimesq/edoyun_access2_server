@@ -1,4 +1,6 @@
 #pragma once
+#include <functional>
+#include <mutex>
 #include <vector>
 #include <map>
 #include <memory>
@@ -6,6 +8,8 @@
 #include <sys/epoll.h>
 
 class Acceptor;
+
+using Functors = std::function<void()>;
 
 class EventLoop
 {
@@ -45,6 +49,38 @@ public:
      * @param _cb The callback function.
      */
     void setOnCloseCallback(TcpConnectionCallback&& _cb);
+
+    /**
+     * @brief create event fd.
+     *
+     * @return int fd.
+     */
+    int createEventFd();
+
+    /**
+     * @brief Read data from the m_evtfd kernel counter and clear the kernel counter.
+     *
+     */
+    void handleEventFdRead();
+
+    /**
+     * @brief write data from the m_evtfd kernel counter and add the kernel counter.
+     *
+     */
+    void wakeupEventFd();
+
+    /**
+     * @brief  Traverse m_pengdings
+     *
+     */
+    void doPengdingFunctors();
+
+    /**
+     * @brief Store "task" in the m_pengdings and wakeup the eventfd
+     *
+     * @param _cb task.
+     */
+    void runInLoop(Functors&& _cb);
 
 private:
     /**
@@ -143,4 +179,22 @@ private:
      *
      */
     TcpConnectionCallback m_onClose;
+
+    /**
+     * @brief event fd for communication with the thread pool
+     *
+     */
+    int m_evtfd;
+
+    /**
+     * @brief Store multiple "tasks" to be executed
+     *
+     */
+    std::vector<Functors> m_pengdings;
+
+    /**
+     * @brief Used for mutually exclusive access to m_pending.
+     *
+     */
+    std::mutex m_mutex;
 };
