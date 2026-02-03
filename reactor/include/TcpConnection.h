@@ -1,4 +1,5 @@
 #pragma once
+#include <map>
 #include <memory>
 #include <string>
 #include <functional>
@@ -90,6 +91,20 @@ public:
      * @param msg Processed results.
      */
     void sendInLoop(std::string const& _sendMsg);
+
+    /**
+     * @brief get all Tcp Connections in reactor;
+     * 
+     * @return const std::map<int, std::shared_ptr<TcpConnection>> tcp connection.
+     */
+    const std::map<int, std::shared_ptr<TcpConnection>> getTcpConnections();
+
+    /**
+     * @brief get the connect fd.
+     * 
+     * @return int fd.
+     */
+    int getFd() const;
 
 private:
     /**

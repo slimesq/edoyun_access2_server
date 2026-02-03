@@ -14,4 +14,7 @@ public:
      *
      */
     void process() override;
+private:
+    std::string m_recvMsg;
+    std::string m_sendMsg;
 };

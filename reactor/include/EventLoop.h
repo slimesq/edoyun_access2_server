@@ -82,6 +82,13 @@ public:
      */
     void runInLoop(Functors&& _cb);
 
+    /**
+     * @brief get all tcp connections.
+     *
+     * @return const std::map<int, std::shared_ptr<TcpConnection>> tcp connections.
+     */
+    const std::map<int, std::shared_ptr<TcpConnection>> getTcpConnections();
+
 private:
     /**
      * @brief wait for events on epoll fd and handle them.
@@ -193,7 +200,7 @@ private:
     std::vector<Functors> m_pengdings;
 
     /**
-     * @brief Used for mutually exclusive access to m_pending.
+     * @brief Used for mutually exclusive access to m_pending and m_conns
      *
      */
     std::mutex m_mutex;

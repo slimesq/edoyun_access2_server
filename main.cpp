@@ -1,7 +1,7 @@
 #include <unistd.h>
 #include <iostream>
 #include <memory>
-#include "TaskBasedTcpServer.h"
+#include "ChatServer.h"
 #include "MyTask.h"
 #include "TcpConnection.h"
 #include "TcpServer.h"
@@ -74,7 +74,7 @@ void testReactorV4()
 
 void testReactorV41()
 {
-    TaskBasedTcpServer server(4, 10, "127.0.0.1", 8888);
+    ChatServer server(4, 10, "192.168.32.129", 8888);
     server.setTaskFactory([](std::shared_ptr<TcpConnection> conn, std::string msg) {
         return std::make_shared<MyTask>(std::move(conn), std::move(msg));
     });

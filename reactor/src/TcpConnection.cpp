@@ -165,3 +165,13 @@ void TcpConnection::sendInLoop(std::string const& _sendMsg)
         this->m_loop->runInLoop(std::move(f));
     }
 }
+
+const std::map<int, std::shared_ptr<TcpConnection>> TcpConnection::getTcpConnections()
+{
+    return this->m_loop->getTcpConnections();
+}
+
+int TcpConnection::getFd() const
+{
+    return this->m_sock.getFd();
+}

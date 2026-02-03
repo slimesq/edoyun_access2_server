@@ -9,11 +9,11 @@
 using TaskFactory =
     std::function<std::shared_ptr<Task>(std::shared_ptr<TcpConnection>, std::string)>;
 
-class TaskBasedTcpServer : public NonCopyable
+class ChatServer : public NonCopyable
 {
 public:
-    TaskBasedTcpServer(size_t _threadNum, size_t _queSize, std::string const& _ip, unsigned short _port);
-    ~TaskBasedTcpServer();
+    ChatServer(size_t _threadNum, size_t _queSize, std::string const& _ip, unsigned short _port);
+    ~ChatServer();
 
     /**
      * @brief

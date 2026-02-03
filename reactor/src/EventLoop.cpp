@@ -117,7 +117,10 @@ void EventLoop::handleNewConnection()
     /*Create a TcpConnection for the new connection and store it in the connection map.*/
     std::shared_ptr<TcpConnection> tcpConn{std::make_shared<TcpConnection>(this, connfd)};
     // this->m_conns.insert(std::make_pair(connfd, tcpConn));
-    this->m_conns[connfd] = tcpConn;
+    {
+        std::lock_guard<std::mutex> lock(this->m_mutex);
+        this->m_conns[connfd] = tcpConn;
+    }
     std::cout << "new connection established: " << tcpConn->toString() << std::endl;
 
     /*
@@ -275,4 +278,10 @@ void EventLoop::runInLoop(Functors&& _cb)
 
     this->wakeupEventFd();
     // std::cout << "wakeupEventFd" << std::endl;
+}
+
+const std::map<int, std::shared_ptr<TcpConnection>> EventLoop::getTcpConnections()
+{
+    std::lock_guard<std::mutex> lock(this->m_mutex);
+    return this->m_conns;
 }
