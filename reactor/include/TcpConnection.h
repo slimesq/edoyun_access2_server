@@ -6,9 +6,11 @@
 #include "Socket.h"
 #include "SocketIO.h"
 #include "InetAddress.h"
+#include "UserContext.h"
 #include "utils/NonCopyable.h"
 
 class EventLoop;
+class UserContext;
 class TcpConnection;
 using TcpConnectionCallback = std::function<void(std::shared_ptr<TcpConnection> const&)>;
 
@@ -94,17 +96,24 @@ public:
 
     /**
      * @brief get all Tcp Connections in reactor;
-     * 
+     *
      * @return const std::map<int, std::shared_ptr<TcpConnection>> tcp connection.
      */
     const std::map<int, std::shared_ptr<TcpConnection>> getTcpConnections();
 
     /**
      * @brief get the connect fd.
-     * 
+     *
      * @return int fd.
      */
     int getFd() const;
+
+    /**
+     * @brief Set the User Context
+     * 
+     * @param _usercontext Information of external users
+     */
+    void setUserContext(std::shared_ptr<UserContext> _usercontext);
 
 private:
     /**
@@ -166,4 +175,10 @@ private:
      *
      */
     TcpConnectionCallback m_onClose;
+
+    /**
+     * @brief Provide a mechanism for saving the user's state within Reactor.
+     *
+     */
+    std::shared_ptr<UserContext> m_userContext{nullptr};
 };

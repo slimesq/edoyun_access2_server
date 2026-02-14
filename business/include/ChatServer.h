@@ -33,7 +33,7 @@ private:
     TcpServer m_server;
 
     /**
-     * @brief 
+     * @brief Function object for saving task types.
      * 
      */
     TaskFactory m_taskFactory;

@@ -3,6 +3,7 @@
 #include <netinet/in.h>
 #include <sys/socket.h>
 #include "InetAddress.h"
+#include "UserContext.h"
 #include <cstdio>
 #include <iostream>
 #include <sstream>
@@ -174,4 +175,9 @@ const std::map<int, std::shared_ptr<TcpConnection>> TcpConnection::getTcpConnect
 int TcpConnection::getFd() const
 {
     return this->m_sock.getFd();
+}
+
+void TcpConnection::setUserContext(std::shared_ptr<UserContext> _usercontext)
+{
+    this->m_userContext = _usercontext;
 }
