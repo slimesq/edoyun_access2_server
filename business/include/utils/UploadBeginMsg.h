@@ -9,4 +9,5 @@ struct UploadBeginMsg
     char* fileName{nullptr};
     size_t fileSha1sumSize{0};
     char* fileSha1sum{nullptr};
+    size_t fileSize{0};
 };

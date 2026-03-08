@@ -1,8 +1,12 @@
 #include "ChatServer.h"
+#include "MyTask.h"
+#include "FileUploadTask.h"
+#include "FileDownloadTask.h"
+#include "utils/MsgType.h"
 #include <cstdio>
+#include <cstring>
 #include <iostream>
 #include <memory>
-#include "Task.h"
 
 ChatServer::ChatServer(size_t _threadNum,
                        size_t _queSize,
@@ -40,13 +44,51 @@ void ChatServer::onNewConnection(std::shared_ptr<TcpConnection> const& _conn)
 
 void ChatServer::onMessage(std::shared_ptr<TcpConnection> const& _conn)
 {
-    // recv
-    std::string recvMsg = _conn->recive();
+    // Read Train header: length (size_t, 8 bytes) + msgType (int, 4 bytes)
+    size_t length = 0;
+    int msgTypeInt = 0;
 
-    std::shared_ptr<Task> task{this->m_taskFactory(_conn, recvMsg)};
-    if (!task)
+    ssize_t ret = _conn->recvn(&length, sizeof(size_t));
+    if (ret <= 0)
     {
-        ::perror("task is nullptr");
+        return;
+    }
+
+    ret = _conn->recvn(&msgTypeInt, sizeof(int));
+    if (ret <= 0)
+    {
+        return;
+    }
+
+    // Read payload
+    std::string payload;
+    if (length > 0)
+    {
+        payload.resize(length);
+        ret = _conn->recvn(payload.data(), length);
+        if (ret <= 0)
+        {
+            return;
+        }
+    }
+
+    MsgType msgType = static_cast<MsgType>(msgTypeInt);
+
+    std::shared_ptr<Task> task;
+    switch (msgType)
+    {
+    case MsgType::GroupChat:
+        task = std::make_shared<MyTask>(_conn, payload);
+        break;
+    case MsgType::UploadBegin:
+    case MsgType::UploadChunk:
+        task = std::make_shared<FileUploadTask>(_conn, msgType, payload);
+        break;
+    case MsgType::DownloadBegin:
+        task = std::make_shared<FileDownloadTask>(_conn, payload);
+        break;
+    default:
+        std::cerr << "Unknown message type: " << msgTypeInt << std::endl;
         return;
     }
 
@@ -56,9 +98,4 @@ void ChatServer::onMessage(std::shared_ptr<TcpConnection> const& _conn)
 void ChatServer::onClose(std::shared_ptr<TcpConnection> const& _conn)
 {
     std::cout << _conn->toString() << " has closed!" << std::endl;
-}
-
-void ChatServer::setTaskFactory(TaskFactory _factory)
-{
-    this->m_taskFactory = std::move(_factory);
 }

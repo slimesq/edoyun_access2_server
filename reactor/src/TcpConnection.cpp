@@ -179,5 +179,17 @@ int TcpConnection::getFd() const
 
 void TcpConnection::setUserContext(std::shared_ptr<UserContext> _usercontext)
 {
+    std::lock_guard<std::mutex> lock(m_userContextMutex);
     this->m_userContext = _usercontext;
+}
+
+ssize_t TcpConnection::recvn(void* _buf, size_t _n)
+{
+    return this->m_sockio.readn(_buf, _n);
+}
+
+std::shared_ptr<UserContext> TcpConnection::getUserContext()
+{
+    std::lock_guard<std::mutex> lock(m_userContextMutex);
+    return this->m_userContext;
 }

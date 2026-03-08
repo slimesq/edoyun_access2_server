@@ -1,6 +1,7 @@
 #pragma once
 #include <map>
 #include <memory>
+#include <mutex>
 #include <string>
 #include <functional>
 #include "Socket.h"
@@ -33,6 +34,22 @@ public:
      * @return std::string The received message.
      */
     std::string recive();
+
+    /**
+     * @brief Read exactly n bytes from the connected socket.
+     *
+     * @param _buf Buffer to store the data.
+     * @param _n Number of bytes to read.
+     * @return ssize_t Number of bytes actually read.
+     */
+    ssize_t recvn(void* _buf, size_t _n);
+
+    /**
+     * @brief Get the User Context object.
+     *
+     * @return std::shared_ptr<UserContext> The user context.
+     */
+    std::shared_ptr<UserContext> getUserContext();
 
     /**
      * @brief Send a message to the connected socket.
@@ -181,4 +198,5 @@ private:
      *
      */
     std::shared_ptr<UserContext> m_userContext{nullptr};
+    std::mutex m_userContextMutex;
 };

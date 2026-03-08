@@ -30,8 +30,8 @@ ssize_t SocketIO::readn(void* _buf, size_t _count)
                 continue;
             else
             {
-                ::perror("read error");
-                ::exit(-1);
+                ::perror("readn error");
+                return -1;
             }
         }
         else if (nread == 0)
@@ -89,8 +89,8 @@ ssize_t SocketIO::readline(void* _buf, size_t _maxCount)
         }
         else if (ret == -1)
         {
-            ::perror("readLine error");
-            ::exit(1);
+            ::perror("readline error");
+            return -1;
         }
         else if (ret == 0)
         {
