@@ -5,7 +5,7 @@
 class FileUpload
 {
 public:
-    FileUpload(std::string _fileSha1sum, size_t _fileSize);
+    FileUpload(const std::string& _fileSha1sum, size_t _fileSize);
     ~FileUpload();
     LoadStatusType getStatus();
     void writeFile(size_t _offset,size_t _size,const char* buf);
